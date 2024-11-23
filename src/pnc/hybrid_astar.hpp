@@ -1,0 +1,148 @@
+#pragma once
+
+#include <iostream>
+#include <Eigen/Eigen>
+#include <vector>
+#include <memory>
+#include <random>
+#include <cmath>
+#include <chrono>
+
+using namespace std;
+using namespace Eigen;
+
+enum NodeSetFlag
+{
+    NOT_VISITED,
+    IN_OPENSET,
+    IN_CLOSESET
+};
+
+class Node3D
+{
+public:
+    Vector3d state;
+    Vector3i index;
+    Vector2d u;//速度和角速度
+    double g;//目前代价值
+    double h;//启发式值
+    double f;//f=g+h
+    NodeSetFlag set_flag = NOT_VISITED;//0:未加入open set和close set 1:加入open set 2:加入close set
+
+    Node3D* father = nullptr;//祖先节点
+
+    std::multimap<double, Node3D*>::iterator it_open;//节点在open set中的迭代器
+
+    
+    bool operator==(const Node3D& node) const {
+        return index == node.index;
+    }
+};
+
+class PlanResult
+{
+public:
+    bool success = false;
+    int iterations = 0;
+    double planTime = 0;
+    double cost = 0;
+    std::vector<Vector3d> trace;
+    std::vector<Vector2d> controls;
+};
+
+class HybridAStar
+{
+public:
+    //参数
+    double finish_radius = 0.1;
+    double max_v = 1.0;
+    double max_w = 1.0;
+    int step_v = 1;
+    int step_w = 1;
+    double dt = 0.1;
+
+    Vector3d resolution;//x,y,theta的分辨率
+    Vector3i grid_size;//x,y,theta的数量
+    vector<Node3D*> nodes;//所有节点
+    vector<Node3D*> closeSet;//close set
+    uint8_t* grid_map;
+    std::multimap<double, Node3D*> openSet;
+    PlanResult result;
+
+private:
+    //提前算好离散vw对应的弧长（代价），割线长度，割线与切线夹角，转角
+    vector<Vector2d> vwList;
+    vector<Vector4d> neighborList;
+
+    void _generateNeighborList(void);
+
+
+public:
+    HybridAStar(Vector3d resolution, Vector3i grid_size, uint8_t* grid_map, double max_v = 1.0, double max_w = 1.0, int step_v = 1, int step_w = 1, double dt = 0.1, double finish_radius = 0.1)
+        : resolution(resolution), grid_size(grid_size), grid_map(grid_map), finish_radius(finish_radius), max_v(max_v), max_w(max_w), step_v(step_v), step_w(step_w), dt(dt)
+    {
+        nodes.resize(grid_size[0]*grid_size[1]*grid_size[2],nullptr);
+        for (int i = 0; i < grid_size[0]; i++)
+        {
+            for (int j = 0; j < grid_size[1]; j++)
+            {
+                for (int k = 0; k < grid_size[2]; k++)
+                {
+                    Node3D* node = new Node3D;
+                    node->index = Vector3i(i,j,k);
+                    node->state = Vector3d(i*resolution[0],j*resolution[1],k*resolution[2]);
+                    nodes[i*grid_size[1]*grid_size[2]+j*grid_size[2]+k] = node;
+                }
+            }
+        }
+        _generateNeighborList();
+        
+    }
+
+    ~HybridAStar()
+    {
+        for(auto node:nodes)
+        {
+            delete node;
+        }
+    }
+
+    PlanResult& plan(Vector3d start, Vector3d goal);
+
+    void reset(void);
+
+    void getNeighbors(Node3D *node, 
+                  vector<Node3D*>& neighbors, 
+                  vector<double>& costs,
+                  vector<Vector3d>& neighborState,
+                  vector<Vector2d>& neighborVW);
+    
+
+    inline int getNodeIndex(Vector3d state)
+    {
+        Vector3i index = Vector3i(state[0]/resolution[0],state[1]/resolution[1],state[2]/resolution[2]);
+        return index[0]*grid_size[1]*grid_size[2]+index[1]*grid_size[2]+index[2];
+    }
+    
+    inline int getGridMapIndex(Vector3d state)
+    {
+        Vector3i index = Vector3i(state[0]/resolution[0],state[1]/resolution[1],state[2]/resolution[2]);
+        return index[0]*grid_size[1] + index[1];
+    }
+
+    inline bool isCollision(Vector3d state)
+    {
+        int index = getGridMapIndex(state);
+        return grid_map[index] == 1;
+    }
+
+    inline double heuristic(Node3D* node1, Node3D* node2)
+    {
+        return (node1->state.block<2,1>(0,0)-node2->state.block<2,1>(0,0)).norm();
+    }
+
+    inline bool isFinish(Node3D* node, Node3D* goal_node)
+    {
+        return (node->state.block<2,1>(0,0)-goal_node->state.block<2,1>(0,0)).norm()<finish_radius;
+    }
+};
