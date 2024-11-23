@@ -103,14 +103,16 @@ void HybridAStar::getNeighbors(Node3D *node,
         dstate(2) = d(3);
         //新状态
         Vector3d newState = node->state + dstate;
-        if (newState(2) > M_PI )
+        if (newState(2) > 2*M_PI )
         {
             newState(2) = newState(2) - 2 * (M_PI);
         }
-        else if (newState(2) < -M_PI)
+        else if (newState(2) < 0)
         {
             newState(2) = newState(2) + 2 * (M_PI);
         }
+        //保护
+        newState = newState.cwiseMax(Vector3d(0, 0, 0)).cwiseMin(map_max);
         //新状态对应的节点
         int index = getNodeIndex(newState);
         auto neighbor = nodes[index];
@@ -156,12 +158,13 @@ void HybridAStar::_generateNeighborList(void)
                 neighbor(1) = L;
             }
             //弧长，作为代价
-            neighbor(0) = abs(v*dt);
+            // neighbor(0) = abs(v*dt);
+            neighbor(0) = dt;
             //原地转向，按移动能力换算代价
-            if (v == 0)
-            {
-                neighbor(0) = abs(neighbor(3))*max_v/max_w;
-            }
+            // if (v == 0)
+            // {
+            //     neighbor(0) = abs(neighbor(3))*max_v/max_w;
+            // }
             vwList.push_back(Vector2d(v, w));
             neighborList.push_back(neighbor);
 

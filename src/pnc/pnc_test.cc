@@ -18,19 +18,21 @@ int main()
     map.input_map(starts, tasks, obstacles);
     // map.show_map();
     
-    Vector3d resolution(0.1, 0.1, M_PI/16);
-    Vector3i grid_size(100, 100, 32);
+    Vector3d resolution(0.1, 0.1, M_PI/8);
+    Vector3i grid_size(100, 100, 16);
     double max_v = 0.4;
     double max_w = 0.3;
     int step_v = 4;
     int step_w = 3;
-    double dt = 0.5;
-    double finish_radius = 0.4;
+    double dt = 0.6;
+    double finish_radius = 0.5;
     HybridAStar hybrid_astar(resolution, grid_size, map.grid_map, max_v, max_w, step_v, step_w, dt, finish_radius);
     Vector3d start(0.5, 0.5, 0.0);
     Vector3d goal(9.5, 9.5, 0.0);
     PlanResult& plan_result = hybrid_astar.plan(start, goal);
     cout << "path length: " << plan_result.trace.size() << endl;
+    cout << plan_result.success << endl;
+    cout << plan_result.planTime << endl;
 
     //plot
     map.show_map();
@@ -42,6 +44,7 @@ int main()
         trace_theta.push_back(plan_result.trace[i](2));
         trace_v.push_back(plan_result.controls[i](0));
         trace_w.push_back(plan_result.controls[i](1));
+        // cout << plan_result.trace[i] << endl;
     }
     plt::plot(trace_x, trace_y, "r-");
     plt::show();
