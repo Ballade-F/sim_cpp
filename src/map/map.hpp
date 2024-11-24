@@ -4,11 +4,9 @@
 #include <Eigen/Eigen>
 #include <vector>
 #include <memory>
-#include "matplotlibcpp.h"
 #include <random>
 #include <cmath>
-// #include <thread>
-// #include <chrono>
+#include "matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 using namespace std;
 using namespace Eigen;

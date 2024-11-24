@@ -15,6 +15,11 @@ PlanResult& HybridAStar::plan(Vector3d start, Vector3d goal)
     start_node->f = start_node->g + start_node->h;
     start_node->set_flag = IN_OPENSET;
     start_node->it_open = openSet.insert(std::make_pair(start_node->f, start_node));
+
+    vector<Node3D*> neighbors;
+    vector<double> costs;
+    vector<Vector3d> neighborState;
+    vector<Vector2d> neighborVW;
     while (!openSet.empty())
     {
         result.iterations++;
@@ -40,10 +45,7 @@ PlanResult& HybridAStar::plan(Vector3d start, Vector3d goal)
         current->set_flag = IN_CLOSESET;
         closeSet.push_back(current);
 
-        vector<Node3D*> neighbors;
-        vector<double> costs;
-        vector<Vector3d> neighborState;
-        vector<Vector2d> neighborVW;
+        
         getNeighbors(current, neighbors, costs, neighborState, neighborVW);
         for (int i = 0; i < neighbors.size(); i++)
         {
@@ -112,9 +114,13 @@ void HybridAStar::getNeighbors(Node3D *node,
             newState(2) = newState(2) + 2 * (M_PI);
         }
         //保护
-        newState = newState.cwiseMax(Vector3d(0, 0, 0)).cwiseMin(map_max);
+        // newState = newState.cwiseMax(Vector3d(0, 0, 0)).cwiseMin(map_max);
         //新状态对应的节点
         int index = getNodeIndex(newState);
+        if (index < 0)
+        {
+            continue;
+        }
         auto neighbor = nodes[index];
         if (neighbor != nullptr && !isCollision(newState) && neighbor->set_flag != IN_CLOSESET)
         {
@@ -157,14 +163,19 @@ void HybridAStar::_generateNeighborList(void)
                 double L = std::sqrt(2*R*R*(1 - std::cos(w * dt)));
                 neighbor(1) = L;
             }
-            //弧长，作为代价
-            // neighbor(0) = abs(v*dt);
-            neighbor(0) = dt;
-            //原地转向，按移动能力换算代价
-            // if (v == 0)
-            // {
-            //     neighbor(0) = abs(neighbor(3))*max_v/max_w;
-            // }
+            
+            // neighbor(0) = dt;
+            // 弧长，作为代价
+            neighbor(0) = abs(v*dt);
+            // 原地转向，按移动能力换算代价
+            if (v == 0)
+            {
+                neighbor(0) = abs(neighbor(3))*max_v/max_w;
+            }
+            if (v < 0)
+            {
+                neighbor(0) *= 2;
+            }
             vwList.push_back(Vector2d(v, w));
             neighborList.push_back(neighbor);
 

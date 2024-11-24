@@ -123,6 +123,10 @@ public:
     inline int getNodeIndex(Vector3d state)
     {
         //做保护
+        // if (state[0] < 0 || state[0] >= map_max[0] || state[1] < 0 || state[1] >= map_max[1])
+        // {
+        //     return -1;
+        // }
         state = state.cwiseMax(Vector3d(0,0,0)).cwiseMin(map_max);
         Vector3i index = Vector3i(state[0]/resolution[0],state[1]/resolution[1],state[2]/resolution[2]);
         index = index.cwiseMin(grid_size - Vector3i(1, 1, 1)).cwiseMax(Vector3i(0, 0, 0));
@@ -133,6 +137,10 @@ public:
     {
         //做保护
         state = state.cwiseMax(Vector3d(0,0,0)).cwiseMin(map_max);
+        // if (state[0] < 0 || state[0] >= map_max[0] || state[1] < 0 || state[1] >= map_max[1])
+        // {
+        //     return -1;
+        // }
         Vector3i index = Vector3i(state[0]/resolution[0],state[1]/resolution[1],state[2]/resolution[2]);
         index = index.cwiseMin(grid_size - Vector3i(1, 1, 1)).cwiseMax(Vector3i(0, 0, 0));
         return index[0]*grid_size[1] + index[1];
@@ -146,12 +154,12 @@ public:
 
     inline double heuristic(Node3D* node1, Node3D* node2)
     {
-        // return (node1->state.block<2,1>(0,0)-node2->state.block<2,1>(0,0)).norm();
-        double dist = (node1->state.block<2,1>(0,0)-node2->state.block<2,1>(0,0)).norm();
-        double angle = std::abs(node1->state[2]-node2->state[2]);
-        double t1 = dist / max_v;
-        double t2 = angle / max_w;
-        return std::max(t1,t2);
+        return (node1->state.block<2,1>(0,0)-node2->state.block<2,1>(0,0)).norm();
+        // double dist = (node1->state.block<2,1>(0,0)-node2->state.block<2,1>(0,0)).norm();
+        // double angle = std::abs(node1->state[2]-node2->state[2]);
+        // double t1 = dist / max_v;
+        // double t2 = angle / max_w;
+        // return std::max(t1,t2);
     }
 
     inline bool isFinish(Node3D* node, Node3D* goal_node)

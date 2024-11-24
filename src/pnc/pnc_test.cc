@@ -20,21 +20,24 @@ int main()
     
     Vector3d resolution(0.1, 0.1, M_PI/8);
     Vector3i grid_size(100, 100, 16);
-    double max_v = 0.4;
-    double max_w = 0.3;
-    int step_v = 4;
-    int step_w = 3;
-    double dt = 0.6;
-    double finish_radius = 0.5;
+    double max_v = 0.5;
+    double max_w = M_PI/4;
+    int step_v = 2;
+    int step_w = 2;
+    double dt = 0.35;
+    double finish_radius = 0.3;
     HybridAStar hybrid_astar(resolution, grid_size, map.grid_map, max_v, max_w, step_v, step_w, dt, finish_radius);
     Vector3d start(0.5, 0.5, 0.0);
-    Vector3d goal(9.5, 9.5, 0.0);
+    Vector3d goal(9.5, 9.5, 0);
     PlanResult& plan_result = hybrid_astar.plan(start, goal);
     cout << "path length: " << plan_result.trace.size() << endl;
     cout << plan_result.success << endl;
     cout << plan_result.planTime << endl;
+    cout << plan_result.iterations << endl;
+    cout << plan_result.cost << endl;
+    cout << plan_result.trace.size() << endl;
 
-    //plot
+    // //plot
     map.show_map();
     vector<double> trace_x, trace_y, trace_theta, trace_v, trace_w;
     for (int i = 0; i < plan_result.trace.size(); i++)
