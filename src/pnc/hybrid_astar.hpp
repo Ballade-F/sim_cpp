@@ -46,8 +46,10 @@ public:
     int iterations = 0;
     double planTime = 0;
     double cost = 0;
-    std::vector<Vector3d> trace;
+    std::vector<Vector3d> path;
     std::vector<Vector2d> controls;
+    vector<Vector3d> trace;
+    vector<Vector2d> trace_controls;
 };
 
 class HybridAStar
@@ -59,7 +61,10 @@ public:
     double max_w = 1.0;
     int step_v = 1;
     int step_w = 1;
-    double dt = 0.1;
+    double dt = 0.5;
+    double trace_dt = 0.1;
+
+    int trace_step = 5; //相邻path点之间的轨迹点数
 
     Vector3d resolution;//x,y,theta的分辨率
     Vector3i grid_size;//x,y,theta的数量
@@ -75,7 +80,11 @@ private:
     vector<Vector2d> vwList;
     vector<Vector4d> neighborList;
 
+    // vector<Vector2d> trace_vwList;
+    // vector<Vector4d> trace_stateList;
+
     void _generateNeighborList(void);
+    void _generateTrace(void);
 
 
 public:

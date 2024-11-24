@@ -30,11 +30,11 @@ PlanResult& HybridAStar::plan(Vector3d start, Vector3d goal)
             result.cost = current->g;
             while (current != nullptr)
             {
-                result.trace.push_back(current->state);
+                result.path.push_back(current->state);
                 result.controls.push_back(current->u);
                 current = current->father;
             }
-            std::reverse(result.trace.begin(), result.trace.end());
+            std::reverse(result.path.begin(), result.path.end());
             std::reverse(result.controls.begin(), result.controls.end());
             //node中的u记录的是上一个节点到当前节点的控制，因此需要删除第一个控制，并在最后补0
             result.controls.erase(result.controls.begin());
@@ -75,8 +75,13 @@ PlanResult& HybridAStar::plan(Vector3d start, Vector3d goal)
             }
         }
     }
+    if (result.success)
+    {
+        _generateTrace();
+    }
     auto end_time = std::chrono::high_resolution_clock::now();
     result.planTime = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+
     return result;
 }
 
@@ -184,6 +189,35 @@ void HybridAStar::_generateNeighborList(void)
     }
 }
 
+void HybridAStar::_generateTrace(void)
+{
+    for (int i = 0; i < result.path.size(); i++)
+    {
+        double v = result.controls[i](0);
+        double w = result.controls[i](1);
+        Vector3d state = result.path[i];
+        for (int j = 0; j < trace_step; j++)
+        {
+            double ddt = trace_dt * j;
+            double theta = w * ddt;//转角
+            double theta_2 = theta / 2;//割线与切线夹角
+            double L = 0;//弦长
+            if (w == 0)
+            {
+                L = v * ddt;
+            }
+            else
+            {
+                double R = v / w;
+                L = std::sqrt(2*R*R*(1 - std::cos(theta)));
+            }
+            Vector3d dstate(L * cos(state(2) + theta_2), L * sin(state(2) + theta_2), theta);
+            Vector3d newState = state + dstate;
+            result.trace.push_back(newState);
+            result.trace_controls.push_back(result.controls[i]);
+        }
+    }
+}
 
 void HybridAStar::reset(void)
 {

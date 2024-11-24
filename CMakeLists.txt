@@ -14,12 +14,18 @@ find_package(Eigen3 REQUIRED)
 find_package(matplotlib_cpp REQUIRED)
 find_package(Python3 COMPONENTS Development NumPy REQUIRED)
 
-include_directories(./src/map ./src/pnc)
-include_directories("/usr/local/include/eigen3")
-include_directories("/usr/include/eigen3")
-include_directories(/usr/include/python3.8)
-include_directories(/home/ballade/anaconda3/envs/drl/include/python3.8)
-include_directories(/home/ballade/anaconda3/envs/drl/lib/python3.8/site-packages/numpy/core/include)
+include_directories(
+    ./src/map 
+    ./src/pnc
+    ./src/thirdparty/include
+    ./src/thirdparty/include/osqp
+    ./src/thirdparty/include/qdldl
+    /usr/local/include/eigen3
+    /usr/include/eigen3
+    /usr/include/python3.8
+    /home/ballade/anaconda3/envs/drl/include/python3.8
+    /home/ballade/anaconda3/envs/drl/lib/python3.8/site-packages/numpy/core/include)
+
 file(GLOB SIM_SOURCEFILE  ./src/map/*.cpp ./src/pnc/*.cpp)
 add_library(SIM_LIB STATIC ${SIM_SOURCEFILE})
 
@@ -28,9 +34,9 @@ add_library(SIM_LIB STATIC ${SIM_SOURCEFILE})
 # target_link_libraries(map_test Python3::Python Python3::NumPy SIM_LIB)
 
 add_executable(pnc_test ./src/pnc/pnc_test.cc)
-target_link_libraries(pnc_test SIM_LIB)
-target_include_directories(pnc_test PRIVATE ${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} lib)
-target_link_libraries(pnc_test Python3::Python Python3::NumPy SIM_LIB)
+# target_include_directories(pnc_test PRIVATE ${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} lib /home/zj/Desktop/wzr/sim_cpp/src/thirdparty/lib)
+target_link_directories(pnc_test PRIVATE /home/zj/Desktop/wzr/sim_cpp/src/thirdparty/lib)
+target_link_libraries(pnc_test Python3::Python Python3::NumPy SIM_LIB osqp qdldl)
 
 # add_executable(test ./src/test.cc)
 # target_include_directories(test PRIVATE ${Python2_INCLUDE_DIRS} ${Python2_NumPy_INCLUDE_DIRS} lib)
