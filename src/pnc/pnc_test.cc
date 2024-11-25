@@ -58,15 +58,15 @@ int main()
     int N = 10;
     double dT = 0.1;
     Eigen::MatrixXd Q(3, 3);
-    Q << 1, 0, 0,
-         0, 1, 0,
+    Q << 10, 0, 0,
+         0, 10, 0,
          0, 0, 1;
     Eigen::MatrixXd R(2, 2);
     R << 1, 0,
-         0, 1;
+         0, 0.1;
     Eigen::MatrixXd Qf(3, 3);
-    Qf << 1, 0, 0,
-          0, 1, 0,
+    Qf << 10, 0, 0,
+          0, 10, 0,
           0, 0, 1;
     MPC mpc(N, dT, 0.4, 0.238, Q, R, Qf);
     VectorXd x_ref(trace_num), y_ref(trace_num), theta_ref(trace_num), v_ref(trace_num), w_ref(trace_num);
@@ -83,17 +83,23 @@ int main()
     VectorXd control;
     //plot
     vector<double> mpc_x, mpc_y;
+    double mpc_time = 0;
     while(1)
     {
         mpc_x.push_back(state_car(0));
         mpc_y.push_back(state_car(1));
+        auto start_time = std::chrono::high_resolution_clock::now();
         bool done = mpc.update(state_car, control);
+        auto end_time = std::chrono::high_resolution_clock::now();
+        mpc_time += chrono::duration<double, std::milli>(end_time - start_time).count();
         if (done)
         {
             break;
         }
         updateState(state_car, control, dT);
     }
+    mpc_time /= mpc_x.size();
+    cout << "mpc time: " << mpc_time << endl;
 
     // //plot
     map.show_map();
