@@ -43,7 +43,8 @@ int main()
     int step_w = 2;
     double dt = 0.5;
     double finish_radius = 0.3;
-    HybridAStar hybrid_astar(resolution, grid_size, map.grid_map, max_v, max_w, step_v, step_w, dt, finish_radius);
+    bool path_flag = true;
+    HybridAStar hybrid_astar(resolution, grid_size, map.grid_map, max_v, max_w, step_v, step_w, dt, finish_radius,path_flag);
     Vector3d start(0.5, 0.5, 0.0);
     Vector3d goal(9.5, 9.5, 0);
     PlanResult& plan_result = hybrid_astar.plan(start, goal);
@@ -53,6 +54,11 @@ int main()
     cout << "path planTime: " << plan_result.planTime << endl;
     cout << "path iterations: " << plan_result.iterations << endl;
     cout << "path cost: " << plan_result.cost << endl;
+
+    // if(!path_flag)
+    // {
+    //     return 0;
+    // }
 
     //nmpc
     int N = 10;
@@ -80,6 +86,7 @@ int main()
     }
     mpc.setTrackReference(x_ref, y_ref, theta_ref, v_ref, w_ref);
     Vector3d state_car(0.5, 0.5, 0.0);
+    Vector2d u_car(0.0, 0.0);
     VectorXd control;
     //plot
     vector<double> mpc_x, mpc_y;
@@ -88,6 +95,8 @@ int main()
     {
         mpc_x.push_back(state_car(0));
         mpc_y.push_back(state_car(1));
+        VectorXd mpc_state(5);
+        mpc_state << state_car(0), state_car(1), state_car(2), u_car(0), u_car(1);
         auto start_time = std::chrono::high_resolution_clock::now();
         bool done = mpc.update(state_car, control);
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -96,6 +105,8 @@ int main()
         {
             break;
         }
+        u_car(0) = control(0);
+        u_car(1) = control(1);
         updateState(state_car, control, dT);
     }
     mpc_time /= mpc_x.size();

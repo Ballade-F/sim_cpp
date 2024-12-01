@@ -13,10 +13,13 @@ endif()
 find_package(Eigen3 REQUIRED)
 find_package(matplotlib_cpp REQUIRED)
 find_package(Python3 COMPONENTS Development NumPy REQUIRED)
+set(Torch_DIR /home/zj/Desktop/wzr/sim_cpp/src/thirdparty/libtorch/share/cmake/Torch) 
+find_package(Torch REQUIRED)
 
 include_directories(
     ./src/map 
     ./src/pnc
+    ./src/utils
     ./src/thirdparty/include
     ./src/thirdparty/include/osqp
     ./src/thirdparty/include/qdldl
@@ -29,14 +32,16 @@ include_directories(
 file(GLOB SIM_SOURCEFILE  ./src/map/*.cpp ./src/pnc/*.cpp)
 add_library(SIM_LIB STATIC ${SIM_SOURCEFILE})
 
-# add_executable(map_test ./src/map/map_test.cc)
-# target_include_directories(map_test PRIVATE ${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} lib)
-# target_link_libraries(map_test Python3::Python Python3::NumPy SIM_LIB)
-
 add_executable(pnc_test ./src/pnc/pnc_test.cc)
 # target_include_directories(pnc_test PRIVATE ${Python3_INCLUDE_DIRS} ${Python3_NumPy_INCLUDE_DIRS} lib /home/zj/Desktop/wzr/sim_cpp/src/thirdparty/lib)
 target_link_directories(pnc_test PRIVATE /home/zj/Desktop/wzr/sim_cpp/src/thirdparty/lib)
 target_link_libraries(pnc_test Python3::Python Python3::NumPy SIM_LIB osqp qdldl)
+
+add_executable(ring_test ./src/utils/test_ring.cc)
+
+
+add_executable(torch_test ./src/test.cc)
+target_link_libraries(torch_test ${TORCH_LIBRARIES})
 
 # add_executable(test ./src/test.cc)
 # target_include_directories(test PRIVATE ${Python2_INCLUDE_DIRS} ${Python2_NumPy_INCLUDE_DIRS} lib)

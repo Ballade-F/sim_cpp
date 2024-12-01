@@ -28,6 +28,11 @@ PlanResult& HybridAStar::plan(Vector3d start, Vector3d goal)
         {
             result.success = true;
             result.cost = current->g;
+            //如果不需要路径，直接返回
+            if(!path_flag)
+            {
+                break;
+            }
             while (current != nullptr)
             {
                 result.path.push_back(current->state);
@@ -75,7 +80,7 @@ PlanResult& HybridAStar::plan(Vector3d start, Vector3d goal)
             }
         }
     }
-    if (result.success)
+    if (result.success && path_flag)
     {
         _generateTrace();
     }
@@ -224,10 +229,12 @@ void HybridAStar::reset(void)
     for (auto p : openSet)
     {
         (p.second)->set_flag = NOT_VISITED;
+        (p.second)->father = nullptr;
     }
     for (auto p : closeSet)
     {
         p->set_flag = NOT_VISITED;
+        p->father = nullptr;
     }
     openSet.clear();
     closeSet.clear();
