@@ -1,7 +1,7 @@
 #include "nmpc.hpp"
 #include "unsupported/Eigen/KroneckerProduct"
 
-MPC::MPC(int N, double dT, double maxWheelSpeed, double wheelWidth, Eigen::MatrixXd Q, Eigen::MatrixXd R, Eigen::MatrixXd Qf)
+void MPC::init(int N, double dT, double maxWheelSpeed, double wheelWidth, Eigen::MatrixXd Q, Eigen::MatrixXd R, Eigen::MatrixXd Qf)
 {
     this->N = N;
     this->dT = dT;
@@ -140,6 +140,18 @@ void MPC::setTrackReference(const Eigen::VectorXd &x,
     x_ref = x;
     y_ref = y;
     theta_ref = theta;
+    //角度限制在-pi到pi之间
+    for (int i = 0; i < theta_ref.size(); i++)
+    {
+        if (theta_ref(i) > M_PI)
+        {
+            theta_ref(i) -= 2 * M_PI;
+        }
+        if (theta_ref(i) < -M_PI)
+        {
+            theta_ref(i) += 2 * M_PI;
+        }
+    }
     v_ref = v;
     w_ref = w;
     enableControl = true;
@@ -270,6 +282,14 @@ void MPC::setup(const Eigen::VectorXd &state)
     e0 << state(0) - x_dummy(0),
           state(1) - y_dummy(0),
           state(2) - theta_dummy(0);
+    if(e0(2) > M_PI)
+    {
+        e0(2) -= 2 * M_PI;
+    }
+    if(e0(2) < -M_PI)
+    {
+        e0(2) += 2 * M_PI;
+    }
     // e0 << state(0), state(1), state(2);
     // std::cout << x_dummy(0) << " " << y_dummy(0) << " " << theta_dummy(0) << std::endl;
     Eigen::MatrixXd sref = Eigen::MatrixXd::Zero(N*3, 1);

@@ -1,7 +1,32 @@
 #include "map.hpp"
 
+void Map_2D::init(double resolution_x, double resolution_y, int n_x, int n_y, int n_starts, int n_tasks, int n_obstacles, int n_ob_points)
+{
+    this->resolution_x = resolution_x;
+    this->resolution_y = resolution_y;
+    this->n_x = n_x;
+    this->n_y = n_y;
+    this->n_starts = n_starts;
+    this->n_tasks = n_tasks;
+    this->n_obstacles = n_obstacles;
+    this->n_ob_points = n_ob_points;
 
-void Map_2D::input_map(const vector<Vector2d> &starts_, const vector<Vector2d> &tasks_, const vector<vector<Vector2d>> &obstacles_)
+    // 初始化地图
+    grid_map = new uint8_t[n_x * n_y];
+    for (int i = 0; i < n_x * n_y; i++)
+    {
+        grid_map[i] = 0;
+    }
+
+    // 初始化任务状态
+    task_status.resize(n_tasks);
+    for (int i = 0; i < n_tasks; i++)
+    {
+        task_status[i] = 0;
+    }
+}
+
+void Map_2D::input_map(const vector<Vector3d> &starts_, const vector<Vector3d> &tasks_, const vector<vector<Vector2d>> &obstacles_)
 {
     starts = starts_;
     tasks = tasks_;
@@ -59,7 +84,7 @@ void Map_2D::input_map(const vector<Vector2d> &starts_, const vector<Vector2d> &
                 int x2 = intersections[j + 1].x();
                 for (int x = x1; x < x2; x++)
                 {
-                    grid_map[x*n_y + y] = 1;
+                    grid_map[y*n_x + x] = 1;
                 }
             }
         }
@@ -69,43 +94,43 @@ void Map_2D::input_map(const vector<Vector2d> &starts_, const vector<Vector2d> &
     }
 }
 
-void Map_2D::show_map()
-{
-    plt::cla();
-    plt::xlim(0.0, static_cast<double>(n_x) * resolution_x);
-    plt::ylim(0.0, static_cast<double>(n_y) * resolution_y);
-    for (int i = 0; i < n_starts; i++)
-    {
-        plt::plot({starts[i].x()} , {starts[i].y()} , "ro");
-    }
-    for (int i = 0; i < n_tasks; i++)
-    {
-        plt::plot({tasks[i].x()} , {tasks[i].y()} , "go");
-    }
-    for (int i = 0; i < n_obstacles; i++)
-    {
-        vector<Vector2d> obstacle = obstacles[i];
-        for (int j = 0; j < n_ob_points; j++)
-        {
-            Vector2d point1 = obstacle[j];
-            Vector2d point2 = obstacle[(j + 1) % n_ob_points];
-            plt::plot({point1.x(), point2.x()}, {point1.y(), point2.y()}, "b-");
-        }
-    }
-    // plt::show();
-}
+// void Map_2D::show_map()
+// {
+//     plt::cla();
+//     plt::xlim(0.0, static_cast<double>(n_x) * resolution_x);
+//     plt::ylim(0.0, static_cast<double>(n_y) * resolution_y);
+//     for (int i = 0; i < n_starts; i++)
+//     {
+//         plt::plot({starts[i].x()} , {starts[i].y()} , "ro");
+//     }
+//     for (int i = 0; i < n_tasks; i++)
+//     {
+//         plt::plot({tasks[i].x()} , {tasks[i].y()} , "go");
+//     }
+//     for (int i = 0; i < n_obstacles; i++)
+//     {
+//         vector<Vector2d> obstacle = obstacles[i];
+//         for (int j = 0; j < n_ob_points; j++)
+//         {
+//             Vector2d point1 = obstacle[j];
+//             Vector2d point2 = obstacle[(j + 1) % n_ob_points];
+//             plt::plot({point1.x(), point2.x()}, {point1.y(), point2.y()}, "b-");
+//         }
+//     }
+//     // plt::show();
+// }
 
-void Map_2D::show_grid_map()
-{
-    plt::cla();
-    uint8_t grid_reverse[n_x * n_y];
-    for (int i = 0; i < n_x; i++)
-    {
-        for (int j = 0; j < n_y; j++)
-        {
-            grid_reverse[j * n_x + i] = 255-grid_map[j * n_x + i];
-        }
-    }
-    plt::imshow(grid_reverse, n_x, n_y, 1, {{"cmap", "gray"}});
-    plt::show();
-}
+// void Map_2D::show_grid_map()
+// {
+//     plt::cla();
+//     uint8_t grid_reverse[n_x * n_y];
+//     for (int i = 0; i < n_x; i++)
+//     {
+//         for (int j = 0; j < n_y; j++)
+//         {
+//             grid_reverse[j * n_x + i] = 255-grid_map[j * n_x + i];
+//         }
+//     }
+//     plt::imshow(grid_reverse, n_x, n_y, 1, {{"cmap", "gray"}});
+//     plt::show();
+// }
