@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-
+#include <Eigen/Eigen>
 #include "network.hpp"
 #include "map.hpp"
 #include "nmpc.hpp"

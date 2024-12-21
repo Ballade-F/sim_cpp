@@ -31,7 +31,6 @@ public:
 class Network
 {
 public:
-    //TODO: 后续设为参数
     string device_string;
     int batch_size=1;
     int n_robot;
