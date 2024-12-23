@@ -1,13 +1,12 @@
 #include "sim_server.hpp"
 
 
-SimServer::SimServer(string map_dir_, string robot_config_path_, string trace_save_path_)
+SimServer::SimServer(string map_csv_path_, string map_json_path, string robot_config_path_, string trace_save_path_)
 {
-    map_dir = map_dir_;
+    map_csv_path = map_csv_path_;
+    map_json_path = map_json_path;
     robot_config_path = robot_config_path_;
     trace_save_dir = trace_save_path_;
-    string map_csv_path = map_dir + "/info.csv";
-    string map_json_path = map_dir + "/batch_info.json";
     // 创建 JSON 解析器
     Json::Reader reader;
     Json::Value map_root;
@@ -181,7 +180,7 @@ void SimServer::decisionUpdate()
         robots[i]->decisionUpdate();
         auto end_time = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> decision_time = end_time - start_time;
-        cout << "robot_id: " << i << " decision_callback_time: " << decision_time.count() << endl;
+        //cout << "robot_id: " << i << " decision_callback_time: " << decision_time.count() << endl;
     }
 }
 

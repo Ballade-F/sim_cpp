@@ -21,13 +21,13 @@ Network::Network(double x_max_, double y_max_, double v_keyframe_max_, int n_rob
     {
         device = torch::Device(torch::kCUDA, stoi(device_string.substr(5)));
         //debug
-        cout << "Training on GPU " << stoi(device_string.substr(5)) << endl;
+        //cout << "Training on GPU " << stoi(device_string.substr(5)) << endl;
     }
     else
     {
         device = torch::Device(device_string == "cuda" ? torch::kCUDA : torch::kCPU);
         //debug
-        cout << "Training on " << (device_string == "cuda" ? "GPU" : "CPU") << endl;
+        //cout << "Training on " << (device_string == "cuda" ? "GPU" : "CPU") << endl;
     }
 
     // Load the model
@@ -36,7 +36,7 @@ Network::Network(double x_max_, double y_max_, double v_keyframe_max_, int n_rob
         allocation_model = torch::jit::load(allocation_model_path);
         allocation_model.to(device);
         allocation_model.eval();
-        cout << "Allocation model loaded successfully!" << endl;
+        //cout << "Allocation model loaded successfully!" << endl;
     }
     catch (const c10::Error &e)
     {
@@ -48,7 +48,7 @@ Network::Network(double x_max_, double y_max_, double v_keyframe_max_, int n_rob
         intention_model = torch::jit::load(intention_model_path);
         intention_model.to(device);
         intention_model.eval();
-        cout << "Intention model loaded successfully!" << endl;
+        //cout << "Intention model loaded successfully!" << endl;
     }
     catch (const c10::Error &e)
     {
@@ -181,10 +181,10 @@ const AllocationResult& Network::getAllocation(const vector<Vector3d> &robot_sta
 
     //forward
     // //debug
-    // cout << robot_tensor << endl;
-    // cout << task_tensor << endl;
-    // cout << obstacles << endl;
-    cout << "valid: " << valid_robot_num << " " << valid_task_num << endl;
+    // //cout << robot_tensor << endl;
+    // //cout << task_tensor << endl;
+    // //cout << obstacles << endl;
+    //cout << "valid: " << valid_robot_num << " " << valid_task_num << endl;
     allocation_model.run_method("config_script",valid_robot_num, valid_task_num, n_obstacle, batch_size, ob_point, device_string);
     allocation_inputs.clear();
     allocation_inputs.push_back(robot_tensor.to(device));
@@ -241,7 +241,7 @@ const IntentionResult& Network::getIntention(const RingBuffer<vector<Vector3d>> 
         v_ave[i] /= (r_point-1);
     }
     // //debug
-    // cout << "robot_tensor: \n" << robot_tensor << endl;
+    // //cout << "robot_tensor: \n" << robot_tensor << endl;
 
     //task tensor
     int task_net_num = n_task + 1;//最后一个是虚拟任务，表示停止，为-1, -1, 0
@@ -267,7 +267,7 @@ const IntentionResult& Network::getIntention(const RingBuffer<vector<Vector3d>> 
     auto output = intention_model.forward(intention_inputs).toTensor();//(batch, n_robot, task_net_num)
     auto end_time = std::chrono::high_resolution_clock::now();
     double intention_time = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-    cout << "intention_forward_time: " << intention_time << endl;
+    //cout << "intention_forward_time: " << intention_time << endl;
 
     //softmax and get the max id
     auto output_softmax = torch::softmax(output, 2);//(batch, n_robot, task_net_num)
@@ -276,7 +276,7 @@ const IntentionResult& Network::getIntention(const RingBuffer<vector<Vector3d>> 
     auto output_max_prob = std::get<0>(output_max);//(batch, n_robot)
 
     //debug 
-    // cout << "intention prob: \n" << output_softmax << endl;
+    // //cout << "intention prob: \n" << output_softmax << endl;
 
     //output
     intention_result.intention_id.resize(n_robot);

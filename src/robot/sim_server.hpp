@@ -5,7 +5,8 @@ class SimServer
 {
 public:
     //输入参数
-    string map_dir;
+    string map_csv_path;
+    string map_json_path;
     string robot_config_path;
     string trace_save_dir;
 
@@ -56,7 +57,7 @@ public:
     vector<double> distances;
     
 
-    SimServer(string map_dir_, string robot_config_path_, string trace_save_path_);
+    SimServer(string map_csv_path_, string map_json_path, string robot_config_path_, string trace_save_path_);
     
     bool SimUpdate();
 
