@@ -1,12 +1,13 @@
 #include "robot.hpp"
 #include "json/json.h"
-
+#include <numeric>
 class SimServer
 {
+public:
     //输入参数
     string map_dir;
     string robot_config_path;
-    string trace_save_path;
+    string trace_save_dir;
 
     //map
     int map_Nrobot;
@@ -51,13 +52,20 @@ class SimServer
     //记录轨迹，最外层是时间，中间是机器人，最里层是x,y,theta，最后存csv
     int time_counter = 0;
     int counter_max;//与任务规模有关
-    vector<vector<Vector3d>> robot_trace;
+    vector<vector<Vector3d>> robot_trace;//初始化的时候分配好内存
     vector<double> distances;
     
 
     SimServer(string map_dir_, string robot_config_path_, string trace_save_path_);
     
-    
+    bool SimUpdate();
+
+    void perceptionUpdate();
+    void keyframeUpdate();
+    void decisionUpdate();
+    void controlUpdate();
+    void traceUpdate();
+    bool judgeFinish();
 
 
     void csv2vector(const string& csv_path, vector<Vector3d>& starts_, vector<Vector3d>& tasks_, vector<vector<Vector2d>>& obstacles_, int n_robot, int n_task, int n_obstacle, int ob_point);

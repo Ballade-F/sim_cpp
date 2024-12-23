@@ -20,6 +20,6 @@
     "mpc_wheel_Vmax": 0.4,
 
     "device" : "cpu",
-    "intention_model_path" : "/home/jxl3028/Desktop/wzr/model/intention_model_12.pt",
-    "allocation_model_path" : "/home/jxl3028/Desktop/wzr/model/allocation_model_12.pt"
+    "intention_model_path" : "/home/zj/Desktop/wzr/sim_cpp/src/config/net_model/intention_model_12.pt",
+    "allocation_model_path" : "/home/zj/Desktop/wzr/sim_cpp/src/config/net_model/allocation_model_12.pt"
 }

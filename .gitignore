@@ -3,6 +3,7 @@ build
 lib
 bin
 thirdparty
+result
 
 # Prerequisites
 *.d
